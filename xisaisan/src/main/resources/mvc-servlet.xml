@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:util="http://www.springframework.org/schema/util" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-4.2.xsd
+	http://www.springframework.org/schema/jee
+	http://www.springframework.org/schema/jee/spring-jee-4.2.xsd
+	http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+	http://www.springframework.org/schema/util 
+	http://www.springframework.org/schema/util/spring-util-4.2.xsd
+	http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+
+	<context:annotation-config />
+	<context:component-scan base-package="com.xishanyang.*" />
+	<mvc:annotation-driven />
+	<mvc:default-servlet-handler />
+
+	<!-- 配置Hibernate事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<!-- proxy-target-class 是否使用cglib代理 -->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="false" />
+	<!-- 配置事务异常封装 -->
+	<bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+
+	<!-- mapping styles映射到styles文件夹 -->
+	<mvc:resources mapping="/css/**" location="/css/" />
+	<!-- mapping js映射到js文件夹 -->
+	<mvc:resources mapping="/js/**" location="/js/" />
+	<!-- mapping imgs映射到imgs文件夹 -->
+	<mvc:resources mapping="/img/**" location="/img/" />
+	<!-- mapping imgs映射到imgs文件夹 -->
+	<mvc:resources mapping="/**" location="/" />
+
+	<mvc:resources mapping="/admin/**" location="/admin/" />
+
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="utf-8"></property>
+		<property name="maxUploadSize" value="10485760000"></property>
+		<property name="maxInMemorySize" value="40960"></property>
+	</bean>
+	<!-- 拦截器 -->
+	<mvc:interceptors>
+		<!-- session超时 -->
+		<mvc:interceptor>
+			<!-- 如果不配置或/*,将拦截所有的Controller -->
+			<!-- 需拦截的地址 -->
+			<mvc:mapping path="/admin/*" />
+			<!-- 需排除拦截的地址 -->
+			<mvc:exclude-mapping path="/login.jsp" />
+			<bean class="com.xishanyang.contoller.SessionInterceptorAdapter">
+				<property name="allowUrls">
+					<list>
+						<!-- 如果请求中包含以下路径，则不进行拦截 -->
+						<value>/login</value>
+						<value>/login.jsp</value>
+					</list>
+				</property>
+			</bean>
+
+		</mvc:interceptor>
+	</mvc:interceptors>
+</beans>
